@@ -9,11 +9,30 @@ inherit F_CLEAN_UP;
 
 void create() { seteuid(getuid()); }
 
-// 去除ANSI颜色码
+// 去除ANSI颜色码（用 replace_string 逐一替换，兼容此 FluffOS 版本）
 string clean_color(string s)
 {
     if (!s) return "";
-    s = regexp(s, "\x1b\[[^m]*m", "");
+    s = replace_string(s, BLK,   "");
+    s = replace_string(s, RED,   "");
+    s = replace_string(s, GRN,   "");
+    s = replace_string(s, YEL,   "");
+    s = replace_string(s, BLU,   "");
+    s = replace_string(s, MAG,   "");
+    s = replace_string(s, CYN,   "");
+    s = replace_string(s, WHT,   "");
+    s = replace_string(s, HIR,   "");
+    s = replace_string(s, HIG,   "");
+    s = replace_string(s, HIY,   "");
+    s = replace_string(s, HIB,   "");
+    s = replace_string(s, HIM,   "");
+    s = replace_string(s, HIC,   "");
+    s = replace_string(s, HIW,   "");
+    s = replace_string(s, HIK,   "");
+    s = replace_string(s, NOR,   "");
+    s = replace_string(s, BOLD,  "");
+    s = replace_string(s, BLINK, "");
+    s = replace_string(s, U,     "");
     return s;
 }
 
