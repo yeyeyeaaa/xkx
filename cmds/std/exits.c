@@ -53,8 +53,10 @@ int main(object me, string arg)
             name = "";
 
         // clean_color: 去掉 ANSI 颜色码
+        // 覆盖三种格式：\x1b[Xm / \x1b[0;Xm / \x1b[1;Xm
         if (stringp(name) && strlen(name) > 0)
         {
+            // 粗体+颜色 \x1b[1;Xm
             name = replace_string(name, "\x1b[1;30m", "");
             name = replace_string(name, "\x1b[1;31m", "");
             name = replace_string(name, "\x1b[1;32m", "");
@@ -63,6 +65,7 @@ int main(object me, string arg)
             name = replace_string(name, "\x1b[1;35m", "");
             name = replace_string(name, "\x1b[1;36m", "");
             name = replace_string(name, "\x1b[1;37m", "");
+            // 明确普通色 \x1b[0;Xm
             name = replace_string(name, "\x1b[0;30m", "");
             name = replace_string(name, "\x1b[0;31m", "");
             name = replace_string(name, "\x1b[0;32m", "");
@@ -71,8 +74,28 @@ int main(object me, string arg)
             name = replace_string(name, "\x1b[0;35m", "");
             name = replace_string(name, "\x1b[0;36m", "");
             name = replace_string(name, "\x1b[0;37m", "");
-            name = replace_string(name, "\x1b[0m",    "");
-            name = replace_string(name, "\x1b[m",     "");
+            // 短格式 \x1b[Xm（最常见，如 \x1b[33m）
+            name = replace_string(name, "\x1b[30m", "");
+            name = replace_string(name, "\x1b[31m", "");
+            name = replace_string(name, "\x1b[32m", "");
+            name = replace_string(name, "\x1b[33m", "");
+            name = replace_string(name, "\x1b[34m", "");
+            name = replace_string(name, "\x1b[35m", "");
+            name = replace_string(name, "\x1b[36m", "");
+            name = replace_string(name, "\x1b[37m", "");
+            // 高亮色 \x1b[9Xm
+            name = replace_string(name, "\x1b[90m", "");
+            name = replace_string(name, "\x1b[91m", "");
+            name = replace_string(name, "\x1b[92m", "");
+            name = replace_string(name, "\x1b[93m", "");
+            name = replace_string(name, "\x1b[94m", "");
+            name = replace_string(name, "\x1b[95m", "");
+            name = replace_string(name, "\x1b[96m", "");
+            name = replace_string(name, "\x1b[97m", "");
+            // 重置码
+            name = replace_string(name, "\x1b[0m",  "");
+            name = replace_string(name, "\x1b[m",   "");
+            name = replace_string(name, "\x1b[1m",  "");
         }
 
         if (!stringp(name) || strlen(name) == 0)

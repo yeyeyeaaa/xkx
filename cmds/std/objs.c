@@ -36,10 +36,55 @@ string clean_color(string s)
     return s;
 }
 
+// 从长名中提取短名：
+// 去掉括号部分 "(Xiao er)"，去掉书名号绰号 "「玉面蛇心」"，取最后剩下的中文名
+// 例：
+//   "店小二(Xiao er)"            → "店小二"
+//   "白驼山少庄主「玉面蛇心」欧阳克(Ouyang ke)" → "欧阳克"
+//   "四只乌鸦"                    → "四只乌鸦"（不变）
+string extract_short_name(string s)
+{
+    int i, lpar, rpar, lbook, rbook, len;
+    string result;
+
+    if (!stringp(s) || strlen(s) == 0) return s;
+
+    // 1. 去掉括号 (...) 及其内容
+    //    找最后一个 '(' 之前的部分（英文括号）
+    lpar = -1;
+    len = strlen(s);
+    for (i = len - 1; i >= 0; i--)
+    {
+        if (s[i] == '(')
+        {
+            lpar = i;
+            break;
+        }
+    }
+    if (lpar > 0)
+        s = s[0..lpar - 1];
+
+    // 2. 去掉书名号绰号「...」及其前面的称谓（取「」之后的部分作为名字）
+    //    如果有「...」，取最后一个 」 之后的内容作为真名
+    //    UTF-8下 「=\xe3\x80\x8a 或 \xe3\x80\x8e，」=对应闭合
+    //    LPC 中直接按字节搜索更可靠，用 strsrch 查找
+    i = strsrch(s, "」", -1);  // 从右往左找最后一个 」
+    if (i > 0 && i < strlen(s) - 1)
+        s = s[i + 1..];         // 取 」 后面的部分
+
+    // 3. 去掉前后空白
+    s = trim(s);
+
+    if (!stringp(s) || strlen(s) == 0)
+        return s;
+
+    return s;
+}
+
 int main(object me, string arg)
 {
     object env, *inv;
-    string *parts, obj_id, obj_short;
+    string *parts, obj_id, obj_short, obj_name;
     string obj_type;
     int i;
 
@@ -74,10 +119,15 @@ int main(object me, string arg)
         else
             continue;
 
-        // 获取显示名（short描述，去颜色）
+        // 获取完整显示名（short描述，去颜色）
         obj_short = clean_color((string)ob->short());
         if (!stringp(obj_short) || strlen(obj_short) == 0)
             obj_short = obj_id;
+
+        // 提取短名（去掉括号英文名和绰号，供左侧列显示）
+        obj_name = extract_short_name(obj_short);
+        if (!stringp(obj_name) || strlen(obj_name) == 0)
+            obj_name = obj_short;
 
         // 判断类型
         if (userp(ob))
@@ -87,7 +137,9 @@ int main(object me, string arg)
         else
             obj_type = "item";
 
-        parts += ({ obj_id + ":" + obj_short + ":" + obj_type });
+        // 协议格式：id:短名:完整名:类型
+        // 客户端左侧列用短名，浮层标题用完整名
+        parts += ({ obj_id + ":" + obj_name + ":" + obj_short + ":" + obj_type });
     }
 
     write("##OBJECTS##" + implode(parts, ",") + "##\n");
